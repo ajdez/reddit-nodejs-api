@@ -33,7 +33,15 @@ return redditAPI.createUser({
   })
   */
   
-redditAPI.getAllPost({})
 
-// It's request time!
+
+/* TESTING SECTION TO MAKE SURE QUERY WORKS*/
+
+// TEST ONE
+
+//redditAPI.getAllPost({})
+
+//TEST TWO
+
+redditAPI.getAllPostsForUser(2, {});
 

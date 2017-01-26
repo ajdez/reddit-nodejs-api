@@ -97,8 +97,8 @@ module.exports = function RedditAPI(conn) {
           return err;
         })
     },
-    getAllPostsForUser: function(userId, Options){
-      
+    getAllPostsForUser: function(userId, options) {
+
       var limit = options.numPerPage || 25;
       var offset = (options.page || 0) * limit;
 
@@ -107,8 +107,9 @@ module.exports = function RedditAPI(conn) {
               users.id AS User_ID, users.username AS Username, users.createdAt AS userCreate, users.updatedAt AS userUpdate
             FROM posts 
             JOIN users ON posts.userId = users.id
+            WHERE posts.userId = ?
             ORDER BY postCreate DESC
-            LIMIT ? OFFSET ?`, [limit, offset])
+            LIMIT ? OFFSET ?`, [userId, limit, offset])
         .then(function(result) {
 
           var array = [];
@@ -146,8 +147,6 @@ module.exports = function RedditAPI(conn) {
           conn.end();
           return err;
         })
-      
-      
     }
   }
 }
