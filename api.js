@@ -47,4 +47,11 @@ return redditAPI.createUser({
 
 
         ///Test Three///
-redditAPI.getSinglePost(2, {});
+//redditAPI.getSinglePost(2, {});
+
+        ///TEST FOUR////  Make sure you change values or you will get error
+
+redditAPI.createSubreddit({name: "OLLa", description: " about the big DDDDD"})
+.then(function(x){
+    console.log(x);
+});

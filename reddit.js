@@ -148,23 +148,37 @@ module.exports = function RedditAPI(conn) {
           return err;
         })
     },
-    getSinglePost: function(postId, options){
-      
+    getSinglePost: function(postId, options) {
+
       var limit = options.numPerPage || 25;
       var offset = (options.page || 0) * limit;
-      
+
       return conn.query(`
         SELECT posts.id AS Post_ID, title, url, users.username
         FROM posts
         JOIN users ON users.id = posts.userId
         WHERE posts.id = ?
         LIMIT ? OFFSET ?`, [postId, limit, offset])
-        .then(function(result){
+        .then(function(result) {
           var hello = result[0];
-          
+
           console.log(JSON.stringify(hello, null, 4));
           conn.end();
         })
+    },
+    createSubreddit: function(sub) { //sub object will contain 'name' and optional 'description'
+      return conn.query(`INSERT INTO subreddits (name, description, createAt) VALUES (?, ?, ?)`, [sub.name, sub.description, new Date()])
+      .then(function(subredditInfo) {
+        return conn.query(`SELECT subreddits.id, subreddits.name, subreddits.description, subreddits.createAt, subreddits.updatedAt FROM subreddits WHERE subreddits.id = ?`, [subredditInfo.insertId]);
+      })
+      .then(function(subredditReturn) {
+        conn.end();
+        return subredditReturn[0];
+      })
+      .catch(function(err) {
+        conn.end();
+        return ("You got an ERROR while trying to add a subreddit :: ", err);
+      })
     }
   }
 }
