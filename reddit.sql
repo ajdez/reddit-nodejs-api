@@ -24,6 +24,18 @@ CREATE TABLE `posts` (
   CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE SET NULL
 );
 
+CREATE TABLE subreddits (
+  id                    INT     AUTO_INCREMENT      PRIMARY KEY,
+  name                  VARCHAR(30)         NOT NULL,
+  description           VARCHAR(200),
+  createAt              DATE,
+  updatedAt             DATE,
+  UNIQUE(name)
+);
+
+
+
+
 
 INSERT INTO users VALUES(null, 'jojoRaver', 'password', "2017-01-01", "2017-01-02");
 INSERT INTO users VALUES(null, 'ladyfingers', 'password', "2016-01-15", "2017-03-05");
