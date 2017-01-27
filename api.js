@@ -39,7 +39,14 @@ return redditAPI.createUser({
 
         /////// TEST ONE //////
 
-//redditAPI.getAllPost({})
+// redditAPI.getAllPost({})
+// .then(x => console.log(x));
+
+redditAPI.getAllPost({})
+.then(function(result){
+    console.log(result);
+})
+
 
         ////TEST TWO///
 
@@ -51,7 +58,23 @@ return redditAPI.createUser({
 
         ///TEST FOUR////  Make sure you change values or you will get error
 
-redditAPI.createSubreddit({name: "OLLa", description: " about the big DDDDD"})
-.then(function(x){
-    console.log(x);
-});
+// redditAPI.createSubreddit({name: "cupcakes", description: " all about food"})
+// .then(function(x){
+//     console.log(x);
+// });
+
+
+        ///TEST FIVE //////
+// redditAPI.getAllSubreddits({})
+// .then(x => console.log(x));
+
+
+        ///TEST SIX/////
+
+// redditAPI.createPost({
+//     userId: 1,
+//     title: "Why all the fuzz",
+//     url: "yahoo.com",
+//     subredditId: 5
+// })
+// .then(x => console.log(x));
