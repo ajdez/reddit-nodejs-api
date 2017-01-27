@@ -147,6 +147,24 @@ module.exports = function RedditAPI(conn) {
           conn.end();
           return err;
         })
+    },
+    getSinglePost: function(postId, options){
+      
+      var limit = options.numPerPage || 25;
+      var offset = (options.page || 0) * limit;
+      
+      return conn.query(`
+        SELECT posts.id AS Post_ID, title, url, users.username
+        FROM posts
+        JOIN users ON users.id = posts.userId
+        WHERE posts.id = ?
+        LIMIT ? OFFSET ?`, [postId, limit, offset])
+        .then(function(result){
+          var hello = result[0];
+          
+          console.log(JSON.stringify(hello, null, 4));
+          conn.end();
+        })
     }
   }
 }

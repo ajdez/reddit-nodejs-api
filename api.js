@@ -37,11 +37,14 @@ return redditAPI.createUser({
 
 /* TESTING SECTION TO MAKE SURE QUERY WORKS*/
 
-// TEST ONE
+        /////// TEST ONE //////
 
 //redditAPI.getAllPost({})
 
-//TEST TWO
+        ////TEST TWO///
 
-redditAPI.getAllPostsForUser(2, {});
+//redditAPI.getAllPostsForUser(2, {});
 
+
+        ///Test Three///
+redditAPI.getSinglePost(2, {});
