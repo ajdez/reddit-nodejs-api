@@ -53,3 +53,12 @@ INSERT INTO posts VALUES(null, "what is the best way to sue my neighbor? She is 
 
 
 
+--ADDED new FK column in posts linking to subreddit page
+
+
+ALTER TABLE posts 
+ADD subredditId   INT ;  
+
+ALTER TABLE posts
+ADD FOREIGN KEY (`subredditId`)
+REFERENCES subreddits(`id`);
