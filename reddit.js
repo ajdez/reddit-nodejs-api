@@ -53,15 +53,33 @@ module.exports = function RedditAPI(conn) {
     getAllPost: function(options) {
       var limit = options.numPerPage || 25;
       var offset = (options.page || 0) * limit;
+      
+          var sortingMethod = [{
+            name: 'Top Ranking',
+            value: `voteScore`
+        }, {
+            name: 'Hotness Ranking',
+            value: 'voteScore/(new Date() - postCreate)'
+        }, {
+            name: 'Newest Ranking',
+            value: 'postCreate'
+        }, {
+            name: 'Contoversial Ranking',
+            value: 'SUBREDDITS'
+        }
+    ]
+      
       return conn.query(`
-            SELECT posts.id AS Post_ID, title, url, userId, posts.createdAt AS postCreate, posts.updatedAt AS postUpdate, 
+            SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCreate, posts.updatedAt AS postUpdate, 
               users.id AS User_ID, users.username AS Username, users.createdAt AS userCreate, users.updatedAt AS userUpdate,
-              subreddits.id AS subId, subreddits.name AS subName, subreddits.description AS subDesc
+              subreddits.id AS subId, subreddits.name AS subName, subreddits.description AS subDesc, SUM(votes.votes) AS voteScore
             FROM users 
-            JOIN posts ON posts.userId = users.id
-            JOIN subreddits ON subreddits.id = posts.subredditId
-            ORDER BY postCreate DESC
-            LIMIT ? OFFSET ?`, [limit, offset])
+            LEFT JOIN posts ON posts.userId = users.id
+            LEFT JOIN subreddits ON subreddits.id = posts.subredditId
+            LEFT JOIN votes ON votes.postId = posts.id
+            GROUP BY Post_ID
+            ORDER BY ? DESC
+            LIMIT ? OFFSET ?`, [sortingMethod, limit, offset]) // sortingMethod is how we decide to sort the data
         .then(function(result) {
           var array = [];
 
@@ -103,7 +121,7 @@ module.exports = function RedditAPI(conn) {
         .catch(function(err) {
           conn.end();
           return ("THIS IS THE ERROR : ", err);
-        })      
+        })
     },
     getAllPostsForUser: function(userId, options) {
 
@@ -202,10 +220,26 @@ module.exports = function RedditAPI(conn) {
           return result;
         })
         .catch(err => ("THIS IS THE ERROR : ", err));
+    },
+    createOrUpdateVote: function(voteInfo) {
+
+      if (voteInfo.votes !== 1 && voteInfo.votes !== -1) {
+        voteInfo.votes = 0;
+      }
+      
+      return conn.query(`
+        INSERT INTO votes SET postId = ? , userId = ?, createdAt = ?, votes = ? ON DUPLICATE KEY UPDATE votes = ? `, [voteInfo.userId, voteInfo.postId, new Date(), voteInfo.votes, voteInfo.votes])
+        .then(function(result){
+          return conn.query(`SELECT postId, userId, createdAt, votes FROM votes`)
+        })
+        .then(function(result){
+          conn.end();
+          return result;
+        })
+        .catch(function(err){
+          conn.end();
+          return ("Error in creating or updating VOTE : ", err);
+        })
     }
   }
 }
-
-
-
-

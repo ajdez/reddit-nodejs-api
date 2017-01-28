@@ -78,3 +78,9 @@ redditAPI.getAllPost({})
 //     subredditId: 5
 // })
 // .then(x => console.log(x));
+
+
+
+        // TEST SEVEN ///
+// redditAPI.createOrUpdateVote({userId: 4, postId: 1, votes: 1})
+// .then(x => console.log(x));

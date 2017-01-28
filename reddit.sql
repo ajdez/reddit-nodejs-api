@@ -34,6 +34,15 @@ CREATE TABLE subreddits (
 );
 
 
+CREATE TABLE votes(
+userId        INT           REFERENCES users(id),
+postId        INT           REFERENCES posts(id),
+votes         TINYINT,  -- find how to use trigger. 
+createdAt     DATE,
+updatedAt     DATE,
+primary key(userId, postId)
+);
+
 
 
 
@@ -62,3 +71,35 @@ ADD subredditId   INT ;
 ALTER TABLE posts
 ADD FOREIGN KEY (`subredditId`)
 REFERENCES subreddits(`id`);
+
+
+
+
+
+-- Top Ranking
+SELECT posts.id, SUM(votes.votes) AS Votes_Score
+  FROM posts
+  JOIN votes ON votes.postId = posts.id
+  GROUP BY posts.id;
+  
+-- Hotness Ranking
+
+SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCreate, posts.updatedAt AS postUpdate, 
+              users.id AS User_ID, users.username AS Username, users.createdAt AS userCreate, users.updatedAt AS userUpdate,
+              subreddits.id AS subId, subreddits.name AS subName, subreddits.description AS subDesc, SUM(votes.votes) AS voteScore
+            FROM users 
+            LEFT JOIN posts ON posts.userId = users.id
+            LEFT JOIN subreddits ON subreddits.id = posts.subredditId
+            LEFT JOIN votes ON votes.postId = posts.id
+            GROUP BY Post_ID
+            ORDER BY (voteScore/(new Date() - postCreate)) DESC;
+            
+            
+SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCreate, posts.updatedAt AS postUpdate,
+            subreddits.id AS subId, subreddits.name AS subName,
+            SUM(votes.votes) AS TotalVotes
+            FROM posts 
+            LEFT JOIN votes ON votes.postId = posts.id
+            LEFT JOIN subreddits ON subreddits.id = posts.subredditId
+            GROUP BY Post_ID
+            ORDER BY TotalVotes;
