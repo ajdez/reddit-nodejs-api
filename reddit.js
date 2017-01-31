@@ -115,8 +115,8 @@ module.exports = function RedditAPI(conn) {
           return array;
         })
         .then(function(result) {
-          conn.end()
-          return (JSON.stringify(result, null, 4));
+    
+          return result;
         })
         .catch(function(err) {
           conn.end();
@@ -166,8 +166,7 @@ module.exports = function RedditAPI(conn) {
           return array;
         })
         .then(function(result) {
-          console.log(JSON.stringify(result, null, 4));
-          conn.end()
+          return result;
         })
         .catch(function(err) {
           conn.end();

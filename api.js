@@ -39,13 +39,13 @@ return redditAPI.createUser({
 
         /////// TEST ONE //////
 
-// redditAPI.getAllPost({})
-// .then(x => console.log(x));
-
 redditAPI.getAllPost({})
-.then(function(result){
-    console.log(result);
-})
+.then(x => console.log(x));
+
+// redditAPI.getAllPost({})
+// .then(function(result){
+//     console.log(result);
+// })
 
 
         ////TEST TWO///
@@ -73,7 +73,7 @@ redditAPI.getAllPost({})
 
 // redditAPI.createPost({
 //     userId: 1,
-//     title: "Why all the fuzz",
+//     title: "Why do people hate joe",
 //     url: "yahoo.com",
 //     subredditId: 5
 // })
