@@ -53,7 +53,7 @@ module.exports = function RedditAPI(conn) {
     getAllPost: function(options) {
       var limit = options.numPerPage || 25;
       var offset = (options.page || 0) * limit;
-      
+      /*
           var sortingMethod = [{
             name: 'Top Ranking',
             value: `voteScore`
@@ -67,7 +67,7 @@ module.exports = function RedditAPI(conn) {
             name: 'Contoversial Ranking',
             value: 'SUBREDDITS'
         }
-    ]
+    ]*/
       
       return conn.query(`
             SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCreate, posts.updatedAt AS postUpdate, 
@@ -78,11 +78,10 @@ module.exports = function RedditAPI(conn) {
             LEFT JOIN subreddits ON subreddits.id = posts.subredditId
             LEFT JOIN votes ON votes.postId = posts.id
             GROUP BY Post_ID
-            ORDER BY ? DESC
-            LIMIT ? OFFSET ?`, [sortingMethod, limit, offset]) // sortingMethod is how we decide to sort the data
+            ORDER BY postCreate DESC
+            LIMIT ? OFFSET ?`, [limit, offset]) // sortingMethod is how we decide to sort the data
         .then(function(result) {
           var array = [];
-
           result.forEach(function(row, i) {
             var post = array.find(function(post) {
               return row.Post_ID === post.Post_ID;
@@ -114,12 +113,7 @@ module.exports = function RedditAPI(conn) {
           })
           return array;
         })
-        .then(function(result) {
-    
-          return result;
-        })
         .catch(function(err) {
-          conn.end();
           return ("THIS IS THE ERROR : ", err);
         })
     },

@@ -5,6 +5,8 @@ var pug = require("pug");
 
 var mysql = require('promise-mysql');
 
+app.use(express.static('static_files'));
+
 //create conection to our clout 9 server
 
 var connection = mysql.createPool({ //should this be createPool
@@ -89,37 +91,51 @@ app.get('/operation/:option', function(request, response) {
 
 
 //Exercise 4 
+//original
+// app.get('/posts', function(request, response) {
+//     var posts = redditAPI.getAllPost({})
 
-app.get('/posts', function(request, response) {
-    var posts = redditAPI.getAllPost({})
+//     return posts.then(function(x) {
+//             var str = `<div id = "contents">
+//                         <h1> List of contents </h1>
+//                             <ul class="contents-list">`
+//             x.forEach(function(result) {
+//                 str = str + `
+//                     <li class="content-item">
+//                         <h2 class="content-item__title">
+//                         <a href= ${result.url}>${result.title}</a>
+//                         </h2>
+//                         <p> Created by ${result.user[0].username} </p>
+//                     </li>`;
+//             })
+//             return str += `
+//                 </ul>
+//             </div>`
+//         })
+//         .then(function(x){
+//             response.send(x);
+//         });
+// })
 
-    return posts.then(function(x) {
-            var str = `<div id = "contents">
-                        <h1> List of contents </h1>
-                            <ul class="contents-list">`
 
-            x.forEach(function(result) {
-                str = str + `
-                    <li class="content-item">
-                        <h2 class="content-item__title">
-                        <a href= ${result.url}>${result.title}</a>
-                        </h2>
-                        <p> Created by ${result.user[0].username} </p>
-                    </li>`;
-            })
-            
-            return str += `
-                </ul>
-            </div>`
+//exercise 7 of question 4
+
+
+app.get("/posts", function(request, response) {
+    redditAPI.getAllPost({})
+        .then(function(postsList) {
+            response.render('post-list', {
+                posts: postsList
+            });
         })
-        .then(function(x){
-            response.send(x);
-        });
-})
+        .catch(function(err) {
+            console.log(err)
+        })
+});
 
 
 //exercise 5
-   //original
+//original
 // app.get('/newContent', function(request, response){
 //     var form = `<form action="/createContent" method="POST"> <!-- what is this method="POST" thing? you should know, or ask me :) -->
 //         <div>
@@ -133,28 +149,35 @@ app.get('/posts', function(request, response) {
 //     response.send(form);
 // });
 
-    //exercise 7
+//exercise 7
 app.set('view engine', 'pug');
 
-app.get('/newContent', function(request, response){
+app.get('/newContent', function(request, response) {
     response.render('create-content');
 });
 
 
+
+
+
+
+
+
+
 //exercise 6
-app.use(body_parser.json() );       
-app.use(body_parser.urlencoded({     
-  extended: true
+app.use(body_parser.json());
+app.use(body_parser.urlencoded({
+    extended: true
 }))
 
-app.post('/createContent', function(request, response){
-    redditAPI.createPost( {
-        id: 1,
-        name: "John Smith",
-        url: request.body.url,
-        title: request.body.title
-    })
-    //response.send("OK");
+app.post('/createContent', function(request, response) {
+    redditAPI.createPost({
+            id: 1,
+            name: "John Smith",
+            url: request.body.url,
+            title: request.body.title
+        })
+        //response.send("OK");
     response.redirect("/newContent")
 })
 

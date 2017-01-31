@@ -1,0 +1,14 @@
+h1 {
+  color: red;  
+  background-color: rgb(50, 200, 50);
+  text-align: center;
+}
+
+a {
+    color: rgb(10, 50, 10);
+}
+
+p {
+    color: white;
+    background-color: purple;
+}
