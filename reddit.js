@@ -1,4 +1,4 @@
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcrypt-then');
 var mysql = require('promise-mysql');
 var HASH_ROUNDS = 10;
 

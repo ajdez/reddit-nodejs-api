@@ -157,13 +157,6 @@ app.get('/newContent', function(request, response) {
 });
 
 
-
-
-
-
-
-
-
 //exercise 6
 app.use(body_parser.json());
 app.use(body_parser.urlencoded({
