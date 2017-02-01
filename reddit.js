@@ -1,5 +1,6 @@
 var bcrypt = require('bcrypt-then');
 var mysql = require('promise-mysql');
+var secureRandom = require('secure-random');
 var HASH_ROUNDS = 10;
 
 
@@ -13,6 +14,7 @@ module.exports = function RedditAPI(conn) {
           )
         })
         .catch(function(err) {
+          console.log("iiiiiiiiiiii", err);
           if (err.code === "ER_DUP_ENTRY") {
             throw (new Error('A user with this username already exist'))
           }
@@ -21,15 +23,13 @@ module.exports = function RedditAPI(conn) {
           }
         })
         .then(function(result) {
+          console.log('IIIIII', result);
           return conn.query(
             'SELECT id, username, createdAt, updatedAt FROM users WHERE id = ?', [result.insertId]
           )
         })
         .then(function(result) {
           return result[0];
-        })
-        .catch(function(err) {
-          return err;
         })
     },
     createPost: function(post) {
@@ -42,12 +42,7 @@ module.exports = function RedditAPI(conn) {
           )
         })
         .then(function(postReturn) {
-          conn.end();
           return postReturn[0];
-        })
-        .catch(function(err) {
-          conn.end();
-          return err;
         })
     },
     getAllPost: function(options) {
@@ -68,7 +63,7 @@ module.exports = function RedditAPI(conn) {
             value: 'SUBREDDITS'
         }
     ]*/
-      
+
       return conn.query(`
             SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCreate, posts.updatedAt AS postUpdate, 
               users.id AS User_ID, users.username AS Username, users.createdAt AS userCreate, users.updatedAt AS userUpdate,
@@ -113,9 +108,6 @@ module.exports = function RedditAPI(conn) {
           })
           return array;
         })
-        .catch(function(err) {
-          return ("THIS IS THE ERROR : ", err);
-        })
     },
     getAllPostsForUser: function(userId, options) {
 
@@ -159,13 +151,6 @@ module.exports = function RedditAPI(conn) {
           })
           return array;
         })
-        .then(function(result) {
-          return result;
-        })
-        .catch(function(err) {
-          conn.end();
-          return err;
-        })
     },
     getSinglePost: function(postId, options) {
 
@@ -182,7 +167,6 @@ module.exports = function RedditAPI(conn) {
           var hello = result[0];
 
           console.log(JSON.stringify(hello, null, 4));
-          conn.end();
         })
     },
     createSubreddit: function(sub) { //sub object will contain 'name' and optional 'description'
@@ -191,12 +175,7 @@ module.exports = function RedditAPI(conn) {
           return conn.query(`SELECT subreddits.id, subreddits.name, subreddits.description, subreddits.createAt, subreddits.updatedAt FROM subreddits WHERE subreddits.id = ?`, [subredditInfo.insertId]);
         })
         .then(function(subredditReturn) {
-          conn.end();
           return subredditReturn[0];
-        })
-        .catch(function(err) {
-          conn.end();
-          return ("You got an ERROR while trying to add a subreddit :: ", err);
         })
     },
     getAllSubreddits: function(options) { //why do all dates become the date of today?
@@ -208,31 +187,40 @@ module.exports = function RedditAPI(conn) {
           FROM subreddits
           ORDER BY createAt DESC
           LIMIT ? OFFSET ?`, [limit, offset])
-        .then(function(result) {
-          conn.end();
-          return result;
-        })
-        .catch(err => ("THIS IS THE ERROR : ", err));
     },
     createOrUpdateVote: function(voteInfo) {
 
       if (voteInfo.votes !== 1 && voteInfo.votes !== -1) {
         voteInfo.votes = 0;
       }
-      
+
       return conn.query(`
         INSERT INTO votes SET postId = ? , userId = ?, createdAt = ?, votes = ? ON DUPLICATE KEY UPDATE votes = ? `, [voteInfo.userId, voteInfo.postId, new Date(), voteInfo.votes, voteInfo.votes])
-        .then(function(result){
+        .then(function(result) {
           return conn.query(`SELECT postId, userId, createdAt, votes FROM votes`)
         })
+    },
+    checkLogin: function(user, pass) {
+      conn.query(`SELECT username, password FROM users WHERE username = ?`, [user])
+        .then(function(result) {
+          if (result.length === 0) {
+            throw (new Error("username or password is incorrect"));
+          }
+          var user = result[0];
+          var actualPassword = user.password
+          return bcrypt.compare(pass, actualPassword)
+        })
         .then(function(result){
-          conn.end();
-          return result;
+          if(result === true){
+            return user;
+          }
+          else{
+            throw (new Error("username or password is incorrect"));
+          }
         })
-        .catch(function(err){
-          conn.end();
-          return ("Error in creating or updating VOTE : ", err);
-        })
+    },
+    createSessionToken(){
+      return secureRandom.randomArray(100).map(code => code.toString(36)).join("");
     }
   }
 }

@@ -103,3 +103,10 @@ SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCre
             LEFT JOIN subreddits ON subreddits.id = posts.subredditId
             GROUP BY Post_ID
             ORDER BY TotalVotes;
+            
+            
+            
+CREATE TABLE sessions (
+  sessionToken            varchar(255)         PRIMARY KEY,
+  userId                  INT                 REFERENCES users(id)
+);

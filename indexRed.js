@@ -4,7 +4,7 @@ var mysql = require('promise-mysql');
 // create a connection to our Cloud9 server
 var connection = mysql.createPool({
   host     : 'localhost',
-  user     : 'randyk', // CHANGE THIS :)
+  user     : process.env.C9_USER, // CHANGE THIS :)
   password : '',
   database: 'reddit'
 });
@@ -16,6 +16,14 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var morgan = require('morgan');
 var app = express();
+
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+
+
 // Specify the usage of the Pug template engine
 app.set('view engine', 'pug');
 // Middleware
@@ -69,12 +77,15 @@ app.get('/', function(req, res) {
 });
 app.get('/login', function(request, response) {
   // code to display login form
+  response.render("login");
   
   
 });
 app.post('/login', function(request, response) {
   // code to login a user
   // hint: you'll have to use response.cookie here
+  redditAPI.checkLogin()
+  
 });
 
 
@@ -83,11 +94,6 @@ app.get('/signup', function(request, response) {
   // code to display signup form
     response.render("signup");
 });
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-    extended: true
-}))
 
 
 app.post('/signup', function(request, response) {
