@@ -120,7 +120,7 @@ app.post("/createPost", function(request, response){
   redditAPI.createPost({
     title: request.body.title,
     url: request.body.url,
-    username: request.loogedInUser.username
+    username: request.loogedInUser.id
   })
   response.redirect("/");
 })
@@ -136,7 +136,7 @@ app.get('/signup', function(request, response) {
 app.post('/signup', function(request, response) {
   // code to signup a user
   // ihnt: you'll have to use bcrypt to hash the user's password
-    redditAPI.createUser({username: request.body.username,
+    redditAPI.createUser({userId: request.body.userId,
                         password: request.body.password})
                         .then(function(x){
                             response.redirect("/");

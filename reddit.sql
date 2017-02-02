@@ -108,5 +108,5 @@ SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCre
             
 CREATE TABLE sessions (
   sessionToken            varchar(255)         PRIMARY KEY,
-  username                  varchar(60)                 REFERENCES users(username)
+  userId                  INT(11)                 REFERENCES users(id)
 );

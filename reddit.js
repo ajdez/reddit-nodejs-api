@@ -225,15 +225,18 @@ module.exports = function RedditAPI(conn) {
     createSessionToken: function() {
       return secureRandom.randomArray(100).map(code => code.toString(36)).join("");
     },
-    createSession: function(userId) {
+    createSession: function(userName) {
       var token = this.createSessionToken();
-      return conn.query(`INSERT INTO sessions SET sessionToken = ?, username = ?`,[token, userId])
+      return conn.query(`SELECT id FROM users WHERE username = ?`, [userName])
+      .then(function(userId){
+        return conn.query(`INSERT INTO sessions SET sessionToken = ?, userId = ?`,[token, userId[0].id])
+      })
       .then(function(){
         return token;
       })
     },
     getUserFromSession: function(cookie){
-      return conn.query(`SELECT username FROM sessions WHERE sessionToken = ?`, [cookie]);
+      return conn.query(`SELECT userId FROM sessions WHERE sessionToken = ?`, [cookie]);
     }
   }
 }
