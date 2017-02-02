@@ -189,11 +189,12 @@ module.exports = function RedditAPI(conn) {
           LIMIT ? OFFSET ?`, [limit, offset])
     },
     createOrUpdateVote: function(voteInfo) {
-
-      if (voteInfo.votes !== 1 && voteInfo.votes !== -1) {
+      if (voteInfo.votes == 1 || voteInfo.votes == -1) {
+        voteInfo.votes = voteInfo.votes;
+      }
+      else{
         voteInfo.votes = 0;
       }
-
       return conn.query(`
         INSERT INTO votes SET postId = ? , userId = ?, createdAt = ?, votes = ? ON DUPLICATE KEY UPDATE votes = ? `, [voteInfo.userId, voteInfo.postId, new Date(), voteInfo.votes, voteInfo.votes])
         .then(function(result) {

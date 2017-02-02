@@ -35,7 +35,16 @@ app.use(cookieParser());
 app.use(morgan('dev'));
 
 //This middleware will check to see if user has a SESSION opened
-app.use(checkLoginToken)
+app.use(checkLoginToken);
+
+// app.use('/secret', function(request, response, next) {
+//   if (request.loggedInUser) {
+//     next();
+//   }
+//   else {
+//     response.send('you are not authorized');
+//   }
+// })
 
 
 /*
@@ -50,30 +59,34 @@ app.get('/', function(req, res) {
   Your job here will be to use the RedditAPI.getAllPosts function to grab the real list of posts.
   For now, we are simulating this with a fake array of posts!
   */
-  var posts = [
-    {
-      id: 123,
-      title: 'Check out this cool site!',
-      url: 'https://www.decodemtl.com/',
-      user: [{
-        id: 42,
-        username: 'cool_dude'
-      }]
-    },
-    {
-      id: 400,
-      title: 'This is SPARTA!!!',
-      url: 'http://www.SPARTA.com/',
-      user:[ {
-        id: 222,
-        username: 'Merilize'
-      }]
-    }
-  ];
-    redditAPI.getAllPost(posts)
-    .then(function(postList){
-        res.render('post-list', {posts: posts});
-    })
+
+  
+  // var posts =  redditAPI.getAllPost({})
+  
+  // [
+  //   {
+  //     id: 123,
+  //     title: 'Check out this cool site!',
+  //     url: 'https://www.decodemtl.com/',
+  //     user: [{
+  //       id: 42,
+  //       username: 'cool_dude'
+  //     }]
+  //   },
+  //   {
+  //     id: 400,
+  //     title: 'This is SPARTA!!!',
+  //     url: 'http://www.SPARTA.com/',
+  //     user:[ {
+  //       id: 222,
+  //       username: 'Merilize'
+  //     }]
+  //   }
+  // ];
+  redditAPI.getAllPost({})
+  .then(function(postList){
+      res.render('post-list', {posts: postList});
+  })
   /*
   Response.render will call the Pug module to render your final HTML.
   Check the file views/post-list.pug as well as the README.md to find out more!
@@ -91,12 +104,12 @@ app.post('/login', function(request, response) {
   // hint: you'll have to use response.cookie here
   redditAPI.checkLogin(request.body.username, request.body.password)
   .then(function(user){
-    redditAPI.createSession(user.username)
+    return redditAPI.createSession(user.username)
   })
 
   .then(function(tokenSession){
     response.cookie('SESSION', tokenSession);
-    response.redirect('/');
+    response.redirect('/createPost');
   })
   .catch(function(err){
     if (err){
@@ -114,15 +127,17 @@ app.get("/createPost",function(request, response){
 })
 
 app.post("/createPost", function(request, response){
-  console.log("IIIIIIIIIIIII", request.body)
-  console.log("PPPPPPPPPPPPPP", request.loogedInUser)
-  
-  redditAPI.createPost({
+  if(request.loggedInUser){
+    redditAPI.createPost({
+    userId: request.loggedInUser[0].userId,
     title: request.body.title,
-    url: request.body.url,
-    username: request.loogedInUser.id
+    url: request.body.url
   })
   response.redirect("/");
+  }
+  else{
+    response.redirect("/signup");
+  }
 })
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -144,8 +159,17 @@ app.post('/signup', function(request, response) {
 });
 
 
+
+
 app.post('/vote', function(request, response) {
   // code to add an up or down vote for a content+user combination
+  redditAPI.createOrUpdateVote({postId: request.body.postId,
+                                votes: request.body.vote,
+                                userId: request.loggedInUser[0].userId
+  })
+  .then(response.send("You made a vote"))
+  
+  
 });
 // Listen
 var port = process.env.PORT || 3000;
@@ -162,18 +186,12 @@ app.listen(port, function() {
 
 
 
-
-
-
-
-
 function checkLoginToken (request, response, next){
   if(request.cookies.SESSION){
-    redditAPI.getUserFromSession(request.cookies.SESSION)
-    .then(function(username){
-      if(username){
-        console.log(username);
-        request.loggedInUser = username; //where is loogedInUser from
+    return redditAPI.getUserFromSession(request.cookies.SESSION)
+    .then(function(userId){
+      if(userId){
+        request.loggedInUser = userId; 
       }
       next();
     });
