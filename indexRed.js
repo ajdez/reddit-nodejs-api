@@ -33,6 +33,11 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 // This middleware will console.log every request to your web server! Read the docs for more info!
 app.use(morgan('dev'));
+
+//This middleware will check to see if user has a SESSION opened
+app.use(checkLoginToken)
+
+
 /*
 IMPORTANT!!!!!!!!!!!!!!!!!
 Before defining our web resources, we will need access to our RedditAPI functions.
@@ -84,10 +89,42 @@ app.get('/login', function(request, response) {
 app.post('/login', function(request, response) {
   // code to login a user
   // hint: you'll have to use response.cookie here
-  redditAPI.checkLogin()
-  
+  redditAPI.checkLogin(request.body.username, request.body.password)
+  .then(function(user){
+    redditAPI.createSession(user.username)
+  })
+
+  .then(function(tokenSession){
+    response.cookie('SESSION', tokenSession);
+    response.redirect('/');
+  })
+  .catch(function(err){
+    if (err){
+      response.status(400).send(err.message);
+    }
+    else{
+      response.status(500).send('An error as occured');
+    }
+  })
 });
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+app.get("/createPost",function(request, response){
+  response.render("create-post")
+})
+
+app.post("/createPost", function(request, response){
+  console.log("IIIIIIIIIIIII", request.body)
+  console.log("PPPPPPPPPPPPPP", request.loogedInUser)
+  
+  redditAPI.createPost({
+    title: request.body.title,
+    url: request.body.url,
+    username: request.loogedInUser.username
+  })
+  response.redirect("/");
+})
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 app.get('/signup', function(request, response) {
@@ -121,3 +158,27 @@ app.listen(port, function() {
     console.log('Web server is listening on http://localhost:' + port);
   }
 });
+
+
+
+
+
+
+
+
+
+function checkLoginToken (request, response, next){
+  if(request.cookies.SESSION){
+    redditAPI.getUserFromSession(request.cookies.SESSION)
+    .then(function(username){
+      if(username){
+        console.log(username);
+        request.loggedInUser = username; //where is loogedInUser from
+      }
+      next();
+    });
+  }
+  else{
+    next();
+  }
+}

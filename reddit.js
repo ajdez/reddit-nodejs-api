@@ -201,26 +201,39 @@ module.exports = function RedditAPI(conn) {
         })
     },
     checkLogin: function(user, pass) {
-      conn.query(`SELECT username, password FROM users WHERE username = ?`, [user])
+      var username;
+      return conn.query(`SELECT username, password FROM users WHERE username = ?`, [user])
         .then(function(result) {
           if (result.length === 0) {
             throw (new Error("username or password is incorrect"));
           }
-          var user = result[0];
-          var actualPassword = user.password
-          return bcrypt.compare(pass, actualPassword)
-        })
-        .then(function(result){
-          if(result === true){
-            return user;
-          }
           else{
+            username = result[0];
+            var hash = username.password;
+            return bcrypt.compare(pass, hash)
+          }
+        })
+        .then(function(result) {
+          if (result === true) {
+            return username;                                                                              //username => id
+          }
+          else {
             throw (new Error("username or password is incorrect"));
           }
         })
     },
-    createSessionToken(){
+    createSessionToken: function() {
       return secureRandom.randomArray(100).map(code => code.toString(36)).join("");
+    },
+    createSession: function(userId) {
+      var token = this.createSessionToken();
+      return conn.query(`INSERT INTO sessions SET sessionToken = ?, username = ?`,[token, userId])
+      .then(function(){
+        return token;
+      })
+    },
+    getUserFromSession: function(cookie){
+      return conn.query(`SELECT username FROM sessions WHERE sessionToken = ?`, [cookie]);
     }
   }
 }
