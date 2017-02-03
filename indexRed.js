@@ -28,7 +28,7 @@ app.use(bodyParser.urlencoded({
 app.set('view engine', 'pug');
 // Middleware
 // This middleware will parse the POST requests coming from an HTML form, and put the result in req.body.  Read the docs for more info!
-app.use(bodyParser.urlencoded({extended: false}));
+// app.use(bodyParser.urlencoded({extended: false}));
 // This middleware will parse the Cookie header from all requests, and put the result in req.cookies.  Read the docs for more info!
 app.use(cookieParser());
 // This middleware will console.log every request to your web server! Read the docs for more info!
@@ -55,44 +55,29 @@ Then, you'll be able to use the API inside your app.get/app.post functions as ap
 */
 // Resources
 app.get('/', function(req, res) {
-  /*
-  Your job here will be to use the RedditAPI.getAllPosts function to grab the real list of posts.
-  For now, we are simulating this with a fake array of posts!
-  */
-  
-  
-  // var posts =  redditAPI.getAllPost({})
-  
-  // [
-  //   {
-  //     id: 123,
-  //     title: 'Check out this cool site!',
-  //     url: 'https://www.decodemtl.com/',
-  //     user: [{
-  //       id: 42,
-  //       username: 'cool_dude'
-  //     }]
-  //   },
-  //   {
-  //     id: 400,
-  //     title: 'This is SPARTA!!!',
-  //     url: 'http://www.SPARTA.com/',
-  //     user:[ {
-  //       id: 222,
-  //       username: 'Merilize'
-  //     }]
-  //   }
-  // ];
+
   redditAPI.getAllPost({})
   .then(function(postList){
       res.render('post-list', {posts: postList});
   })
+  
   /*
   Response.render will call the Pug module to render your final HTML.
   Check the file views/post-list.pug as well as the README.md to find out more!
   */
  
 });
+
+app.post("/", function(request, response){
+  redditAPI.getAllPost({sort: request.body.sortButton})
+  .then(function(postList){
+      response.render('post-list', {posts: postList});
+  })
+})
+
+
+
+
 app.get('/login', function(request, response) {
   // code to display login form
   response.render("login");

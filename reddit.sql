@@ -178,10 +178,23 @@ SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCre
 -- numUpvotes < numDownvotes ? totalVotes * (numUpvotes / numDownvotes) : totalVotes * (numDownvotes / numUpvotes) 
 -- we can filter out posts that have few votes (< 100) since they may not be meaningful.
 
-SELECT postId
-FROM votes
-GROUP BY postId
-ORDER BY 
+
+SELECT (SELECT count(postId)
+          FROM votes
+          WHERE votes = 1
+          GROUP BY postId) AS numUpVotes, 
+          (SELECT count(postId) 
+          FROM votes
+          WHERE votes = -1
+          GROUP BY postId) AS numDownVotes,
+          (SELECT count(postId)
+            FROM votes
+            GROUP BY postId) AS totalVotes
+   FROM votes
+   WHERE votes > 99
+    
+  
+
 
 
 SELECT postId, count(postId) AS numUpVotes
@@ -191,11 +204,16 @@ GROUP BY postId
 ORDER BY numUpVotes;
 
 
-SELECT postId, count(postId) AS numUpVotes
+SELECT postId, count(postId) AS numDownVotes
 FROM votes
 WHERE votes = -1
 GROUP BY postId
 ORDER BY numUpVotes;
+
+SELECT postId, count(postId) AS totalVotes
+FROM votes
+GROUP BY postId
+ORDER BY totalVotes;
 
 
 
@@ -213,9 +231,10 @@ SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCre
             ORDER BY criteria DESC;
             
             
-SELECT ((SUM(votes)*10000)/(unix_timestamp() - UNIX_TIMESTAMP(createdAt)))
-FROM votes
-GROUP BY postId
-ORDER BY (SELECT ((SUM(votes)*10000)/(unix_timestamp() - UNIX_TIMESTAMP(createdAt))) FROM votes)
 
 
+
+select count(postId) < sum(postId) ? 5 : 10
+from votes
+where postId = 8
+group by postId;

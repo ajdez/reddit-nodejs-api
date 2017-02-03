@@ -1,12 +1,16 @@
 extends layout.pug
 
 block content
-    div(id="sortButtons")
-        h3 What do you want to see?
-        button(type="submit" value="Top Ranking") Top
-        button(type="submit" value="Hotness Ranking") Hot
-        button(type="submit" value="Newest Ranking") New
-        button(type="submit" value="Controversial Ranking") Controversial
+    form(action="/", method="POST")
+        div(id="sortButtons")
+            h3 What do you want to see?
+            h6 Top
+                input(type="radio" name="sortButton" value="topRanking")
+            h6 Hot
+                input(type="radio" name="sortButton" value="hotnessRanking")
+            h6 New
+                input(type="radio" name="sortButton" value="newRanking")
+        button(type="submit") sort!
     div(id="content")
         h1 List of contents
         ul(class="contents-list")

@@ -49,31 +49,38 @@ module.exports = function RedditAPI(conn) {
       var limit = options.numPerPage || 25;
       var offset = (options.page || 0) * limit;
       
-          var sortingMethod = [{
-            name: 'Top Ranking',
-            value: `voteScore`
-        }, {
-            name: 'Hotness Ranking',
-            value: 'voteScore/(new Date() - postCreate)'
-        }, {
-            name: 'Newest Ranking',
-            value: 'postCreate'
-        }, {
-            name: 'Controversial Ranking',
-            value: 'SUBREDDITS'
-        }
-    ]
+      var sortSelect="";
+      var sortSort="";
+      if(options.sort === "topRanking"){
+        sortSelect = ", sum(votes) AS criteria";
+        sortSort = "criteria";
+      }
+      else if (options.sort === "newRanking"){
+        sortSelect = "";
+        sortSort = "Post_ID"
+      }
+      else {
+        sortSelect = `, (SELECT ((SUM(votes)*10000)/(unix_timestamp() - UNIX_TIMESTAMP(createdAt)))
+                          FROM votes
+                          WHERE votes.postId = Post_ID
+                          GROUP BY votes.postId
+                          ORDER BY (SELECT ((SUM(votes)*10000)/(unix_timestamp() - UNIX_TIMESTAMP(createdAt))) FROM votes)) AS criteria`;
+                          
+        sortSort = "criteria"
+      }
+      
+  
 
       return conn.query(`
             SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCreate, posts.updatedAt AS postUpdate, 
               users.id AS User_ID, users.username AS Username, users.createdAt AS userCreate, users.updatedAt AS userUpdate,
-              subreddits.id AS subId, subreddits.name AS subName, subreddits.description AS subDesc, SUM(votes.votes) AS voteScore
+              subreddits.id AS subId, subreddits.name AS subName, subreddits.description AS subDesc ${sortSelect}
             FROM users 
             LEFT JOIN posts ON posts.userId = users.id
             LEFT JOIN subreddits ON subreddits.id = posts.subredditId
             LEFT JOIN votes ON votes.postId = posts.id
             GROUP BY Post_ID
-            ORDER BY postCreate DESC
+            ORDER BY ${sortSort} DESC
             LIMIT ? OFFSET ?`, [limit, offset]) // sortingMethod is how we decide to sort the data
         .then(function(result) {
           var array = [];
