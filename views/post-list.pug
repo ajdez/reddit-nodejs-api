@@ -1,24 +1,29 @@
 extends layout.pug
 
 block content
-    form(action="/posts", method="POST")
-        div(id="content")
-            h1 List of contents
-            ul(class="contents-list")
-                each post in posts 
-                    li( class="content-item")
-                        h2(class = "content-item__title")
-                            a(href = post.url) #{post.title}
-                            p Created by:  #{post.user[0].username}
-                            form(action="/vote", method="POST")
-                                div
-                                    input(type="hidden" name="vote" value="1")
-                                div
-                                    input(type="hidden" name="postId" value= post.id)
-                                button(type="submit") Upvote This
-                            form(action="/vote", method="POST")
-                                div
-                                    input(type="hidden" name="vote" value="-1")
-                                div
-                                    input(type="hidden" name="postId" value= post.id)
-                                button(type="submit") Downvote This
+    div(id="sortButtons")
+        h3 What do you want to see?
+        button(type="submit" value="Top Ranking") Top
+        button(type="submit" value="Hotness Ranking") Hot
+        button(type="submit" value="Newest Ranking") New
+        button(type="submit" value="Controversial Ranking") Controversial
+    div(id="content")
+        h1 List of contents
+        ul(class="contents-list")
+            each post in posts 
+                li( class="content-item")
+                    h2(class = "content-item__title")
+                        a(href = post.url) #{post.title}
+                        p Created by:  #{post.user[0].username}
+                        form(action="/vote", method="POST")
+                            div
+                                input(type="hidden" name="vote" value="1")
+                            div
+                                input(type="hidden" name="postId" value= post.id)
+                            button(type="submit") Upvote This
+                        form(action="/vote", method="POST")
+                            div
+                                input(type="hidden" name="vote" value="-1")
+                            div
+                                input(type="hidden" name="postId" value= post.id)
+                            button(type="submit") Downvote This

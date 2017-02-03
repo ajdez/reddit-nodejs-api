@@ -48,7 +48,7 @@ module.exports = function RedditAPI(conn) {
     getAllPost: function(options) {
       var limit = options.numPerPage || 25;
       var offset = (options.page || 0) * limit;
-      /*
+      
           var sortingMethod = [{
             name: 'Top Ranking',
             value: `voteScore`
@@ -59,10 +59,10 @@ module.exports = function RedditAPI(conn) {
             name: 'Newest Ranking',
             value: 'postCreate'
         }, {
-            name: 'Contoversial Ranking',
+            name: 'Controversial Ranking',
             value: 'SUBREDDITS'
         }
-    ]*/
+    ]
 
       return conn.query(`
             SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCreate, posts.updatedAt AS postUpdate, 
@@ -189,17 +189,24 @@ module.exports = function RedditAPI(conn) {
           LIMIT ? OFFSET ?`, [limit, offset])
     },
     createOrUpdateVote: function(voteInfo) {
-      if (voteInfo.votes == 1 || voteInfo.votes == -1) {
-        voteInfo.votes = voteInfo.votes;
-      }
-      else{
-        voteInfo.votes = 0;
-      }
-      return conn.query(`
-        INSERT INTO votes SET postId = ? , userId = ?, createdAt = ?, votes = ? ON DUPLICATE KEY UPDATE votes = ? `, [voteInfo.userId, voteInfo.postId, new Date(), voteInfo.votes, voteInfo.votes])
-        .then(function(result) {
-          return conn.query(`SELECT postId, userId, createdAt, votes FROM votes`)
-        })
+      console.log(voteInfo)
+      return conn.query(`SELECT votes FROM votes WHERE userId = ? AND postId = ?`, [voteInfo.userId, +voteInfo.postId])
+      .then(function(voteDB){
+        console.log(voteDB)
+        var oldVote = !voteDB[0] ? null : voteDB[0].votes;
+        var newVote = +voteInfo.votes;
+        
+        console.log(oldVote, newVote)
+        newVote = oldVote===newVote ? 0 : newVote;
+        
+        return conn.query(`
+          INSERT INTO votes SET postId = ? , userId = ?, createdAt = ?, votes = ? ON DUPLICATE KEY UPDATE votes = ?`, [voteInfo.postId, voteInfo.userId, new Date(), newVote, newVote]
+        )
+      })
+      .then(function(result) {
+        console.log(result)
+      })
+      .catch(console.log)
     },
     checkLogin: function(user, pass) {
       var username;
@@ -241,3 +248,10 @@ module.exports = function RedditAPI(conn) {
     }
   }
 }
+
+
+
+
+
+
+

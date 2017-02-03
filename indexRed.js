@@ -59,7 +59,7 @@ app.get('/', function(req, res) {
   Your job here will be to use the RedditAPI.getAllPosts function to grab the real list of posts.
   For now, we are simulating this with a fake array of posts!
   */
-
+  
   
   // var posts =  redditAPI.getAllPost({})
   
@@ -151,7 +151,7 @@ app.get('/signup', function(request, response) {
 app.post('/signup', function(request, response) {
   // code to signup a user
   // ihnt: you'll have to use bcrypt to hash the user's password
-    redditAPI.createUser({userId: request.body.userId,
+    redditAPI.createUser({username: request.body.username,
                         password: request.body.password})
                         .then(function(x){
                             response.redirect("/");

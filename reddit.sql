@@ -110,3 +110,112 @@ CREATE TABLE sessions (
   sessionToken            varchar(255)         PRIMARY KEY,
   userId                  INT(11)                 REFERENCES users(id)
 );
+
+
+
+
+
+-- Top Vote
+SELECT postId, sum(votes)
+FROM votes
+GROUP BY postId;
+
+       --full quuery
+SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCreate, posts.updatedAt AS postUpdate, 
+              users.id AS User_ID, users.username AS Username, users.createdAt AS userCreate, users.updatedAt AS userUpdate,
+              subreddits.id AS subId, subreddits.name AS subName, subreddits.description AS subDesc,  sum(votes) AS criteria
+            FROM users 
+            LEFT JOIN posts ON posts.userId = users.id
+            LEFT JOIN subreddits ON subreddits.id = posts.subredditId
+            LEFT JOIN votes ON votes.postId = posts.id
+            GROUP BY Post_ID
+            ORDER BY criteria DESC;
+
+
+--Hotness (score)
+SELECT postId, ((SUM(votes)*10000)/(unix_timestamp() - UNIX_TIMESTAMP(createdAt))) AS TIME
+FROM votes
+GROUP BY postId
+ORDER BY (SELECT ((SUM(votes)*10000)/(unix_timestamp() - UNIX_TIMESTAMP(createdAt))) FROM votes);
+
+
+        --Full Query
+SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCreate, posts.updatedAt AS postUpdate, 
+              users.id AS User_ID, users.username AS Username, users.createdAt AS userCreate, users.updatedAt AS userUpdate,
+              subreddits.id AS subId, subreddits.name AS subName, subreddits.description AS subDesc,  (SELECT ((SUM(votes)*10000)/(unix_timestamp() - UNIX_TIMESTAMP(createdAt)))
+                                                                                                        FROM votes
+                                                                                                        WHERE votes.postId = Post_ID
+                                                                                                        GROUP BY votes.postId
+                                                                                                        ORDER BY (SELECT ((SUM(votes)*10000)/(unix_timestamp() - UNIX_TIMESTAMP(createdAt))) FROM votes)) AS criteria
+            FROM users 
+            LEFT JOIN posts ON posts.userId = users.id
+            LEFT JOIN subreddits ON subreddits.id = posts.subredditId
+            LEFT JOIN votes ON votes.postId = posts.id
+            GROUP BY Post_ID
+            ORDER BY criteria DESC;
+
+
+
+
+--Newest Ranking
+SELECT id
+FROM posts
+ORDER BY createdAt;
+
+          --full query
+SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCreate, posts.updatedAt AS postUpdate, 
+              users.id AS User_ID, users.username AS Username, users.createdAt AS userCreate, users.updatedAt AS userUpdate,
+              subreddits.id AS subId, subreddits.name AS subName, subreddits.description AS subDesc
+            FROM users 
+            LEFT JOIN posts ON posts.userId = users.id
+            LEFT JOIN subreddits ON subreddits.id = posts.subredditId
+            LEFT JOIN votes ON votes.postId = posts.id
+            GROUP BY Post_ID
+            ORDER BY postCreate DESC;
+
+--Controversial
+
+-- numUpvotes < numDownvotes ? totalVotes * (numUpvotes / numDownvotes) : totalVotes * (numDownvotes / numUpvotes) 
+-- we can filter out posts that have few votes (< 100) since they may not be meaningful.
+
+SELECT postId
+FROM votes
+GROUP BY postId
+ORDER BY 
+
+
+SELECT postId, count(postId) AS numUpVotes
+FROM votes
+WHERE votes = 1
+GROUP BY postId
+ORDER BY numUpVotes;
+
+
+SELECT postId, count(postId) AS numUpVotes
+FROM votes
+WHERE votes = -1
+GROUP BY postId
+ORDER BY numUpVotes;
+
+
+
+
+SELECT posts.id AS Post_ID, title, url, posts.userId, posts.createdAt AS postCreate, posts.updatedAt AS postUpdate, 
+              users.id AS User_ID, users.username AS Username, users.createdAt AS userCreate, users.updatedAt AS userUpdate,
+              subreddits.id AS subId, subreddits.name AS subName, subreddits.description AS subDesc,  (SELECT id
+                      FROM posts
+                      ORDER BY createdAt) AS criteria
+            FROM users 
+            LEFT JOIN posts ON posts.userId = users.id
+            LEFT JOIN subreddits ON subreddits.id = posts.subredditId
+            LEFT JOIN votes ON votes.postId = posts.id
+            GROUP BY Post_ID
+            ORDER BY criteria DESC;
+            
+            
+SELECT ((SUM(votes)*10000)/(unix_timestamp() - UNIX_TIMESTAMP(createdAt)))
+FROM votes
+GROUP BY postId
+ORDER BY (SELECT ((SUM(votes)*10000)/(unix_timestamp() - UNIX_TIMESTAMP(createdAt))) FROM votes)
+
+
