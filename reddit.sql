@@ -238,3 +238,35 @@ select count(postId) < sum(postId) ? 5 : 10
 from votes
 where postId = 8
 group by postId;
+
+
+
+
+
+
+CREATE TABLE comments (
+  id          INT               auto_increment        PRIMARY KEY,
+  text        VARCHAR(10000),
+  createdAt   DATETIME,
+  updatedAt   DATETIME,
+  userId      INT               REFERENCES users(id),
+  postId      INT               REFERENCES posts(id),
+  parentId    INT               
+);
+
+
+
+
+INSERT INTO comments VALUES(null, "First comment!", "2017-02-03", null, 7, 1, null);
+INSERT INTO comments VALUES(null, "First reply!", "2017-02-03", null, 8, 1, 1);
+INSERT INTO comments VALUES(null, "I have a large issue with this content!", "2017-02-03", null, 10, 1, null);
+INSERT INTO comments VALUES(null, "First comment!", "2017-02-03", null, 8, 1, null);
+INSERT INTO comments VALUES(null, "First comment!", "2017-02-03", null, 10, 1, 2);
+INSERT INTO comments VALUES(null, "First comment!", "2017-02-03", null, 11, 1, 2);
+
+
+SELECT comments.text 
+FROM comments 
+LEFT JOIN posts ON (posts.id  = comments.postId 
+LEFT JOIN comments ON comments.postId = posts.id;
+

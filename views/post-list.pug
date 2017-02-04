@@ -4,11 +4,11 @@ block content
     form(action="/", method="POST")
         div(id="sortButtons")
             h3 What do you want to see?
-            h6 Top
+            h4 Top
                 input(type="radio" name="sortButton" value="topRanking")
-            h6 Hot
+            h4 Hot
                 input(type="radio" name="sortButton" value="hotnessRanking")
-            h6 New
+            h4 New
                 input(type="radio" name="sortButton" value="newRanking")
         button(type="submit") sort!
     div(id="content")

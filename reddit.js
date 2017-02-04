@@ -14,7 +14,6 @@ module.exports = function RedditAPI(conn) {
           )
         })
         .catch(function(err) {
-          console.log("iiiiiiiiiiii", err);
           if (err.code === "ER_DUP_ENTRY") {
             throw (new Error('A user with this username already exist'))
           }
@@ -23,7 +22,6 @@ module.exports = function RedditAPI(conn) {
           }
         })
         .then(function(result) {
-          console.log('IIIIII', result);
           return conn.query(
             'SELECT id, username, createdAt, updatedAt FROM users WHERE id = ?', [result.insertId]
           )
@@ -252,6 +250,18 @@ module.exports = function RedditAPI(conn) {
     },
     getUserFromSession: function(cookie){
       return conn.query(`SELECT userId FROM sessions WHERE sessionToken = ?`, [cookie]);
+    },
+    createComment: function(comment){
+      return conn.query(`INSERT INTO (text, userId, postId, createdAt, parentId) VALUES (?, ?, ?, ?, ?`,[comment.text, comment.userId, comment.postId, new Date(), comment.postId])
+      .then(function(result){
+        conn.query(`SELECT id, text, userId, postId, createdAt, parentId FROM comments WHERE id = ?`, [result.insertId])
+      })
+      .then(function(queryObject){
+        return queryObject[0];
+      })
+    },
+    getCommentsForPost: function(postId){
+      
     }
   }
 }
